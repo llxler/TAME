@@ -132,8 +132,8 @@ def eval_quality(real_data, syn_data, dataname, model):
 
 if __name__ == '__main__':
     
-    dataname = 'shoppers' # TODO 修改数据集的名字
-    model = 'tabddpm'
+    dataname = 'beijing' # TODO 修改数据集的名字
+    model = 'tabsyn'
     real_path = f'synthetic/{dataname}/real.csv'
     
     syn_path = input('Please input the path of the synthetic data path: ')

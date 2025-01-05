@@ -1108,7 +1108,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         sample = torch.cat([z_norm, z_cat], dim=1).cpu()
         return sample
 
-
+    # python main.py --dataname adult --method tabddpm --mode sample --save_path mem_weight_adult.csv --task_name mem_weight_adult
     @torch.no_grad()
     def sample(self, num_samples):
         b = num_samples
@@ -1128,7 +1128,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         task_name = self.task_name
         mem_list, mem_cat_list, mem_num_list = {}, {}, {}
         
-        dataname = "shoppers" # TODO 改成对应的数据集
+        dataname = "adult" # TODO 改成对应的数据集
         
         # 2. 路径和数据
         raw_config = src.load_config(f"/home/lxl/TabCutMix/baselines/tabddpm/configs/{dataname}.toml")
@@ -1159,7 +1159,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
                 t
             )
             
-            if i == 0:
+            if (i + 1) % 10 == 0 or i == 0:
                 ########################  Memorization Guidance ########################
                     
                 # 1. 得到当前的sample数据
@@ -1189,16 +1189,16 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
                 # 3. 开始计算memorization的值
                 cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data)
                 
-                # mem_list[i] = mem
-                # mem_cat_list[i] = mem_cat
-                # mem_num_list[i] = mem_num
+                mem_list[i] = mem_weight
+                mem_cat_list[i] = cat_mem
+                mem_num_list[i] = num_mem
                 
                 print(f"在step: {i}的时候，memorization的值为: {cat_mem}, cat_mem: {num_mem}, num_mem: {mem_weight}")
                 
-                # # 4. 是用mem来引导model_out
-                # # model_out = model_out + cc * mem
+                # 4. 是用mem来引导model_out
+                # model_out = model_out + cc * mem
                 
-                # # 5. for 后保存结果
+                # 5. for 后保存结果
                 
                 #######################  Memorization Guidance ########################
 
@@ -1286,15 +1286,15 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
                 log_z = self.p_sample(model_out_cat, log_z, t)
 
         # 5. 保存mem结果
-        # if mem_list:
-        #     with open(f"eval/result/{task_name}.txt", "w") as f:
-        #         f.write(f"task_name: {task_name}\n")
-        #         for step in mem_list.keys():
-        #             f.write(f"step: {step}, mem: {mem_list[step]}, cat_mem: {mem_cat_list[step]}, num_mem: {mem_num_list[step]}\n")
-        # else:
-        #     with open(f"eval/result/{task_name}.txt", "w") as f:
-        #         f.write(f"task_name: {task_name}\n")
-        #         f.write(f"no memorization record\n")
+        if mem_list:
+            with open(f"eval/result/{task_name}.txt", "w") as f:
+                f.write(f"task_name: {task_name}\n")
+                for step in mem_list.keys():
+                    f.write(f"step: {step}, mem: {mem_list[step]}, cat_mem: {mem_cat_list[step]}, num_mem: {mem_num_list[step]}\n")
+        else:
+            with open(f"eval/result/{task_name}.txt", "w") as f:
+                f.write(f"task_name: {task_name}\n")
+                f.write(f"no memorization record\n")
 
         print()
         z_ohe = torch.exp(log_z).round()

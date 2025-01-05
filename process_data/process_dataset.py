@@ -5,7 +5,7 @@ import sys
 import random
 import json
 import argparse
-from process_data.cutmix_intra import cutmix_tabular
+# from process_data.cutmix_intra import cutmix_tabular
 
 TYPE_TRANSFORM ={
     'float', np.float32,
@@ -18,7 +18,7 @@ INFO_PATH = 'data/Info'
 parser = argparse.ArgumentParser(description='process dataset')
 
 # General configs
-parser.add_argument('--dataname', type=str, default="shoppers", help='Name of dataset.')
+parser.add_argument('--dataname', type=str, help='Name of dataset.')
 args = parser.parse_args()
 
 def get_column_name_mapping(data_df, num_col_idx, cat_col_idx, target_col_idx, column_names = None):
@@ -59,38 +59,38 @@ def get_column_name_mapping(data_df, num_col_idx, cat_col_idx, target_col_idx, c
 
 
 def train_val_test_split(data_df, cat_columns, num_train = 0, num_test = 0):
-    total_num = data_df.shape[0]
-    idx = np.arange(total_num)
+    # total_num = data_df.shape[0]
+    # idx = np.arange(total_num)
 
 
-    seed = 82
+    # seed = 82
 
-    while True:
-        np.random.seed(seed)
-        np.random.shuffle(idx)
+    # while True:
+    #     np.random.seed(seed)
+    #     np.random.shuffle(idx)
 
-        train_idx = idx[:num_train]
-        test_idx = idx[-num_test:]
+    #     train_idx = idx[:num_train]
+    #     test_idx = idx[-num_test:]
 
-        train_df = data_df.loc[train_idx]
-        test_df = data_df.loc[test_idx]
+    #     train_df = data_df.loc[train_idx]
+    #     test_df = data_df.loc[test_idx]
 
-        flag = 0
-        for i in cat_columns:
-            if len(set(train_df[i])) != len(set(data_df[i])):
-                flag = 1
-                break
+    #     flag = 0
+    #     for i in cat_columns:
+    #         if len(set(train_df[i])) != len(set(data_df[i])):
+    #             flag = 1
+    #             break
 
-        if flag == 0:
-            break
-        else:
-            seed += 1
+    #     if flag == 0:
+    #         break
+    #     else:
+    #         seed += 1
     
     ############## 测试小数量级数据集 ##############
-    # seed = 5201314
-    # data_seed = data_df.sample(frac=1, random_state=seed).reset_index(drop=True)
-    # train_df = data_seed[:num_train]
-    # test_df = data_seed[-num_test:]
+    seed = 5201314
+    data_seed = data_df.sample(frac=1, random_state=seed).reset_index(drop=True)
+    train_df = data_seed[:900]
+    test_df = data_seed[-100:]
     ############## 测试小数量级数据集 ##############
         
     return train_df, test_df, seed    
@@ -111,7 +111,7 @@ def process_data(name):
         data_df = data_df.drop('ID', axis=1)
 
     # 取出数据的百分比
-    # data_df = data_df.sample(frac=0.005, random_state=5201314)
+    data_df = data_df.sample(frac=0.1, random_state=5201314)
     
     num_data = data_df.shape[0]
 
@@ -334,7 +334,7 @@ if __name__ == "__main__":
     if args.dataname:
         process_data(args.dataname)
     else:
-        for name in ['adult', 'default', 'shoppers', 'magic']:
+        for name in ['adult', 'default', 'shoppers']:
             process_data(name)
 
         

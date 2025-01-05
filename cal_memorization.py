@@ -98,7 +98,7 @@ def cal_cat_ori(dataname, generated_path, train_data):
 
         ratio = min_distance / second_min_distance
 
-        if ratio <= 999/1000:
+        if ratio < 1 / 3:
             replicate_count += 1
 
     replicate_ratio = replicate_count / len(generated_data)
