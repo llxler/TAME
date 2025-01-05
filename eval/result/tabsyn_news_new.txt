@@ -1,0 +1,25 @@
+mem_all: 1.0, cat_ori: 0.0, num_ori: 0.0
+*********** Evaluation ***********
+
+1. MLE: 
+{
+    "best_r2_scores": {
+        "XGBRegressor": {
+            "r2": -1.430267572402954, 
+            "explained_variance": -0.11011850833892822, 
+            "MAE": 1.0678194761276245, 
+            "RMSE": 1.3652822971343994
+        }
+    }, 
+    "best_rmse_scores": {
+        "XGBRegressor": {
+            "r2": -1.430267572402954, 
+            "explained_variance": -0.11011850833892822, 
+            "MAE": 1.0678194761276245, 
+            "RMSE": 1.3652822971343994
+        }
+    }
+}
+2. Density: 
+Shape: 0.5525344039911433, Trend: 0.89449917356039
+3. DCR: 
