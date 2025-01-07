@@ -12,7 +12,7 @@ import json
 
 from baselines.tabddpm.models.utils import *
 import src
-from cal_memorization import cal_mem_weight
+from cal_memorization import cal_mem_weight, cal_cat_ori
 from utils_train import make_dataset
 
 """
@@ -1109,7 +1109,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         return sample
 
     # python main.py --dataname adult --method tabddpm --mode sample --save_path mem_weight_adult.csv --task_name mem_weight_adult
-    @torch.no_grad()
+    # @torch.no_grad()
     def sample(self, num_samples):
         b = num_samples
         device = self.log_alpha.device
@@ -1124,11 +1124,11 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         
         ############### 准备一下数据的处理工具 ##############
         # 1. 参数，和记录工具
-        cc = "xx" # 连续值
+        cc = "xx" # 连续值s
         task_name = self.task_name
         mem_list, mem_cat_list, mem_num_list = {}, {}, {}
         
-        dataname = "adult" # TODO 改成对应的数据集
+        dataname = "magic" # TODO 改成对应的数据集
         
         # 2. 路径和数据
         raw_config = src.load_config(f"/home/lxl/TabCutMix/baselines/tabddpm/configs/{dataname}.toml")
@@ -1159,46 +1159,46 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
                 t
             )
             
-            if (i + 1) % 10 == 0 or i == 0:
+            # if (i + 1) % 10 == 0 or i == 0:
                 ########################  Memorization Guidance ########################
                     
                 # 1. 得到当前的sample数据
-                z_ohe = torch.exp(log_z).round()
-                z_cat = log_z
-                if has_cat:
-                    z_cat = ohe_to_categories(z_ohe, self.num_classes)
+                # z_ohe = torch.exp(log_z).round()
+                # z_cat = log_z
+                # if has_cat:
+                #     z_cat = ohe_to_categories(z_ohe, self.num_classes)
                     
-                # 2. 处理成对应的表格sample_data
-                # 获取当前时间步的 alpha_bar_t，并根据 diffusion kernal 得到x0_hat
-                # alpha_bar_t = extract(self.alphas_cumprod, t, z_norm.shape)
-                # x0_hat = predict_x0(z_norm, model_out[:, :self.num_numerical_features], alpha_bar_t)
+                # # 2. 处理成对应的表格sample_data
+                # # 获取当前时间步的 alpha_bar_t，并根据 diffusion kernal 得到x0_hat
+                # # alpha_bar_t = extract(self.alphas_cumprod, t, z_norm.shape)
+                # # x0_hat = predict_x0(z_norm, model_out[:, :self.num_numerical_features], alpha_bar_t)
                 
-                syn_data = torch.cat([z_norm, z_cat], dim=1).cpu()
-                syn_data = syn_data[:train_data.shape[0], :]
-                syn_num, syn_cat, syn_target = split_num_cat_target(syn_data, info, num_inverse, cat_inverse) 
-                syn_df = recover_data(syn_num, syn_cat, syn_target, info)
+                # syn_data = torch.cat([z_norm, z_cat], dim=1).cpu()
+                # syn_data = syn_data[:train_data.shape[0], :]
+                # syn_num, syn_cat, syn_target = split_num_cat_target(syn_data, info, num_inverse, cat_inverse) 
+                # syn_df = recover_data(syn_num, syn_cat, syn_target, info)
 
-                idx_name_mapping = info['idx_name_mapping']
-                idx_name_mapping = {int(key): value for key, value in idx_name_mapping.items()}
+                # idx_name_mapping = info['idx_name_mapping']
+                # idx_name_mapping = {int(key): value for key, value in idx_name_mapping.items()}
 
-                syn_df.rename(columns = idx_name_mapping, inplace=True)
+                # syn_df.rename(columns = idx_name_mapping, inplace=True)
 
-                save_path = f"memorization/mid_{task_name}.csv"
-                syn_df.to_csv(save_path, index = False)
+                # save_path = f"memorization/mid_{task_name}.csv"
+                # syn_df.to_csv(save_path, index = False)
                 
-                # 3. 开始计算memorization的值
-                cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data)
+                # # 3. 开始计算memorization的值
+                # cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data)
                 
-                mem_list[i] = mem_weight
-                mem_cat_list[i] = cat_mem
-                mem_num_list[i] = num_mem
+                # mem_list[i] = mem_weight
+                # mem_cat_list[i] = cat_mem
+                # mem_num_list[i] = num_mem
                 
-                print(f"在step: {i}的时候，memorization的值为: {cat_mem}, cat_mem: {num_mem}, num_mem: {mem_weight}")
+                # print(f"在step: {i}的时候，memorization的值为: {cat_mem}, cat_mem: {num_mem}, num_mem: {mem_weight}")
                 
-                # 4. 是用mem来引导model_out
-                # model_out = model_out + cc * mem
+                # # 4. 是用mem来引导model_out
+                # # model_out = model_out + cc * mem
                 
-                # 5. for 后保存结果
+                # # 5. for 后保存结果
                 
                 #######################  Memorization Guidance ########################
 
@@ -1206,95 +1206,97 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
             model_out_cat = model_out[:, self.num_numerical_features:]
             
             ##### gen new fun #####
-            
-            # out = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['out']
-            # noise = torch.randn_like(z_norm)
-            # nonzero_mask = (
-            #     (t != 0).float().view(-1, *([1] * (len(z_norm.shape) - 1)))
-            # )  # no noise when t == 0
-            
-            # # 获取mem
-            # z_ohe = torch.exp(log_z).round()
-            # z_cat = log_z
-            # if has_cat:
-            #     z_cat = ohe_to_categories(z_ohe, self.num_classes)
+            if i % 10 == 0: # 每隔十步引导一次
+                out = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['out']
+                noise = torch.randn_like(z_norm)
+                nonzero_mask = (
+                    (t != 0).float().view(-1, *([1] * (len(z_norm.shape) - 1)))
+                )  # no noise when t == 0
                 
-            # # 2. 处理成对应的表格sample_data
-            # alpha_bar_t = extract(self.alphas_cumprod, t, z_norm.shape)
-            # x0_hat = predict_x0(z_norm, model_out[:, :self.num_numerical_features], alpha_bar_t)
-            
-            # syn_data = torch.cat([x0_hat, z_cat], dim=1).cpu()
-            # syn_data = syn_data[:train_data.shape[0], :]
-            # syn_num, syn_cat, syn_target = split_num_cat_target(syn_data, info, num_inverse, cat_inverse) 
-            # syn_df = recover_data(syn_num, syn_cat, syn_target, info)
+                # 获取mem
+                z_ohe = torch.exp(log_z).round()
+                z_cat = log_z
+                if has_cat:
+                    z_cat = ohe_to_categories(z_ohe, self.num_classes)
+                    
+                # 2. 处理成对应的表格sample_data
+                alpha_bar_t = extract(self.alphas_cumprod, t, z_norm.shape)
+                x0_hat = predict_x0(z_norm, model_out[:, :self.num_numerical_features], alpha_bar_t)
+                
+                syn_data = torch.cat([x0_hat, z_cat], dim=1).cpu()
+                syn_data = syn_data[:train_data.shape[0], :]
+                syn_num, syn_cat, syn_target = split_num_cat_target(syn_data, info, num_inverse, cat_inverse) 
+                syn_df = recover_data(syn_num, syn_cat, syn_target, info)
 
-            # idx_name_mapping = info['idx_name_mapping']
-            # idx_name_mapping = {int(key): value for key, value in idx_name_mapping.items()}
+                idx_name_mapping = info['idx_name_mapping']
+                idx_name_mapping = {int(key): value for key, value in idx_name_mapping.items()}
 
-            # syn_df.rename(columns=idx_name_mapping, inplace=True)
+                syn_df.rename(columns=idx_name_mapping, inplace=True)
 
-            # save_path = f"memorization/mid_{task_name}.csv"
-            # syn_df.to_csv(save_path, index=False)
+                save_path = f"memorization/mid_{task_name}.csv"
+                syn_df.to_csv(save_path, index=False)
 
-            # # 3. 开始计算memorization的值
-            # mem = cal_cat_ori(dataname, save_path, train_data)
+                # 3. 开始计算memorization的值
+                # mem = cal_cat_ori(dataname, save_path, train_data)
+                cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data) # 适用于数字类型数据集
+                mem = mem_weight
 
-            # # 获取最后一列并准备条件
-            # last_column = train_data.iloc[:, -1]
-            # last_column = last_column.replace({True: 1, False: 0})  # TODO 这里填写数据集的名字
-            # last_column = last_column.values
-            # last_column_tensor = torch.tensor(last_column, dtype=torch.float32).reshape(train_data.shape[0], 1)
-            # y_condition = last_column_tensor.float().to(device)
+                # 获取最后一列并准备条件
+                last_column = train_data.iloc[:, -1]
+                last_column = last_column.replace({"g": 1, "h": 0})  # TODOs 根据数据集来改写
+                last_column = last_column.values
+                last_column_tensor = torch.tensor(last_column, dtype=torch.float32).reshape(train_data.shape[0], 1)
+                y_condition = last_column_tensor.float().to(device)
 
-            # # 从 out['mean'] 创建一个新的张量
-            # x_hat = out['mean'].clone().float().requires_grad_(True).to(device)
+                # 从 out['mean'] 创建一个新的张量
+                x_hat = out['mean'].clone().float().requires_grad_(True).to(device)
 
-            # # 让新的 x_hat 在反向传播时保留梯度
-            # x_hat.retain_grad()
+                # 让新的 x_hat 在反向传播时保留梯度
+                x_hat.retain_grad()
 
-            # # 初始化模型
-            # model = ConditionNet(x_hat.shape[1], 1).to(device)
+                # 初始化模型
+                model = ConditionNet(x_hat.shape[1], 1).to(device)
 
-            # # 计算 log_p_y_given_x_t
-            # log_p_y_given_x_t = model(x_hat[:train_data.shape[0]], y_condition)
+                # 计算 log_p_y_given_x_t
+                log_p_y_given_x_t = model(x_hat[:train_data.shape[0]], y_condition)
 
-            # # 计算损失并检查梯度
-            # loss = -log_p_y_given_x_t.mean()
-            # loss.backward()
+                # 计算损失并检查梯度
+                loss = -log_p_y_given_x_t.mean()
+                loss.backward()
 
-            # # 获取 x_hat 的梯度
-            # x_hat_grad = x_hat.grad
-            
-            # # 吧x_hat，y_condition从计算图中抽离出来
-            # x_hat.detach_()
-            # x_hat.requires_grad = False
-            # y_condition.detach_()
-            # y_condition.requires_grad = False
+                # 获取 x_hat 的梯度
+                x_hat_grad = x_hat.grad
+                
+                # 吧x_hat，y_condition从计算图中抽离出来
+                x_hat.detach_()
+                x_hat.requires_grad = False
+                y_condition.detach_()
+                y_condition.requires_grad = False
 
-            # # 修改步骤中的参数
-            # aa, bb = -5, 900_000
-            # para1, para2 = aa * mem, bb * mem
-            
-            # # 更新 z_norm 的计算
-            # z_norm = x_hat + para1 * nonzero_mask * (torch.exp(0.5 * out["log_variance"]) - x_hat_grad * para2) * noise
-            
-            ##### gen new fun #####
-            
-            z_norm = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['sample']
+                # 修改步骤中的参数
+                aa, bb = -5, 900_000
+                para1, para2 = aa * mem, bb * mem
+                
+                # 更新 z_norm 的计算
+                z_norm = x_hat + para1 * nonzero_mask * (torch.exp(0.5 * out["log_variance"]) - x_hat_grad * para2) * noise
+                
+                ##### gen new fun #####
+            else:
+                z_norm = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['sample']
             
             if has_cat:
                 log_z = self.p_sample(model_out_cat, log_z, t)
 
         # 5. 保存mem结果
-        if mem_list:
-            with open(f"eval/result/{task_name}.txt", "w") as f:
-                f.write(f"task_name: {task_name}\n")
-                for step in mem_list.keys():
-                    f.write(f"step: {step}, mem: {mem_list[step]}, cat_mem: {mem_cat_list[step]}, num_mem: {mem_num_list[step]}\n")
-        else:
-            with open(f"eval/result/{task_name}.txt", "w") as f:
-                f.write(f"task_name: {task_name}\n")
-                f.write(f"no memorization record\n")
+        # if mem_list:
+        #     with open(f"eval/result/{task_name}.txt", "w") as f:
+        #         f.write(f"task_name: {task_name}\n")
+        #         for step in mem_list.keys():
+        #             f.write(f"step: {step}, mem: {mem_list[step]}, cat_mem: {mem_cat_list[step]}, num_mem: {mem_num_list[step]}\n")
+        # else:
+        #     with open(f"eval/result/{task_name}.txt", "w") as f:
+        #         f.write(f"task_name: {task_name}\n")
+        #         f.write(f"no memorization record\n")
 
         print()
         z_ohe = torch.exp(log_z).round()

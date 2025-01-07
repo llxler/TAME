@@ -41,7 +41,7 @@ y_policy = "default"
 
 [sample]
 num_samples = 37581
-batch_size = 10000
+batch_size = 37600
 seed = 0
 
 [eval.type]

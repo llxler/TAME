@@ -9,7 +9,7 @@ from eval.eval_dcr import eval_dcr
 from eval.eval_detection import eval_detection
 from cal_memorization import cal_cat_ori, cal_mem_weight, cal_num_ori, cal_mem_ori
 
-def eval_all(task_name, syn_data_path, dataname="news"): #TODO 修改数据集名字
+def eval_all(task_name, syn_data_path, dataname="shoppers"): #TODO 修改数据集名字
     train_data = pd.read_csv(f"synthetic/{dataname}/real.csv")
     test_data = pd.read_csv(f"synthetic/{dataname}/test.csv")
     syn_data = pd.read_csv(syn_data_path)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TASK_NAME="tabddpm_shoppers_-5_90w"
-DATA_NAME="shoppers"
+TASK_NAME="tabddpm_magic_-5_90w"
+DATA_NAME="magic"
 
 source ~/miniconda3/etc/profile.d/conda.sh &&
 
