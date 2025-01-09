@@ -33,4 +33,4 @@ if __name__ == '__main__':
 # python main.py --dataname shoppers --method tabsyn --mode train
 
 # sample
-# python main.py --dataname shoppers --method tabsyn --mode sample --save_path sample_end_csv/eeeee.csv
+# python main.py --dataname shoppers --method tabsyn --mode sample --save_path sample_end_csv/tabsyn_shoppers_.csv

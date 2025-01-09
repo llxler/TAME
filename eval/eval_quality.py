@@ -132,7 +132,7 @@ def eval_quality(real_data, syn_data, dataname, model):
 
 if __name__ == '__main__':
     
-    dataname = 'shoppers' # TODO 修改数据集的名字
+    dataname = 'adult' # TODO 修改数据集的名字
     model = 'tabddpm'
     real_path = f'synthetic/{dataname}/real.csv'
     

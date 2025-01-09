@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TASK_NAME="tabddpm_magic_-5_90w"
-DATA_NAME="magic"
+TASK_NAME="tabddpm_news_ori"
+DATA_NAME="news"
 
 source ~/miniconda3/etc/profile.d/conda.sh &&
 

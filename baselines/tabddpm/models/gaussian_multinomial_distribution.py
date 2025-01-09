@@ -1109,7 +1109,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         return sample
 
     # python main.py --dataname adult --method tabddpm --mode sample --save_path mem_weight_adult.csv --task_name mem_weight_adult
-    # @torch.no_grad()
+    @torch.no_grad()
     def sample(self, num_samples):
         b = num_samples
         device = self.log_alpha.device
@@ -1128,7 +1128,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         task_name = self.task_name
         mem_list, mem_cat_list, mem_num_list = {}, {}, {}
         
-        dataname = "magic" # TODO 改成对应的数据集
+        dataname = "news" # TODO 改成对应的数据集
         
         # 2. 路径和数据
         raw_config = src.load_config(f"/home/lxl/TabCutMix/baselines/tabddpm/configs/{dataname}.toml")
@@ -1206,7 +1206,8 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
             model_out_cat = model_out[:, self.num_numerical_features:]
             
             ##### gen new fun #####
-            if i % 10 == 0: # 每隔十步引导一次
+            # if i % 10 == 0: # 每隔十步引导一次
+            if i == -1:
                 out = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['out']
                 noise = torch.randn_like(z_norm)
                 nonzero_mask = (

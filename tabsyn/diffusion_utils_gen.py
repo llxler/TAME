@@ -7,7 +7,7 @@ from scipy.stats import betaprime
 import torch.nn as nn
 import pandas as pd
 from tabsyn.latent_utils import get_input_generate, recover_data, split_num_cat_target
-from cal_memorization import cal_mem_weight, cal_mem_ori
+from cal_memorization import cal_mem_weight, cal_cat_ori
 #----------------------------------------------------------------------------
 # Loss function corresponding to the variance preserving (VP) formulation
 # from the paper "Score-Based Generative Modeling through Stochastic
@@ -29,9 +29,6 @@ S_churn = torch.tensor(1.0, requires_grad=True)
 S_min = torch.tensor(0.0, requires_grad=True)
 S_max = torch.tensor(float('inf'), requires_grad=True)  # 注意，这里使用了无穷大表示
 S_noise = torch.tensor(1.0, requires_grad=True)
-
-
-
 
 # 定义一个简单的神经网络来估计 log p(y | x_t)
 class ConditionNet(nn.Module):
@@ -182,7 +179,7 @@ def sample_step(net, num_steps, i, t_cur, t_next, x_next, dim, mean, info, num_i
     #print(x_hat_grad)
     #exit(1)
     para1 = -5
-    para2 = 800_000
+    para2 = 900_000
     #当para1 = 1,para2 = 0时，为原版
     #当para1 <0 para2 = 0 时，往与训练数据相反的方向移动 当para1 > 0 para2 = 0往相同的方向移动
     #当para2 > 0时  ？
@@ -211,14 +208,13 @@ def sample_step(net, num_steps, i, t_cur, t_next, x_next, dim, mean, info, num_i
 
     syn_df.rename(columns = idx_name_mapping, inplace=True)
     syn_df.to_csv(save_path, index = False)
-    exit()
     
-    # mem = cal_cat_ori(dataname, save_path, df)
-    cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, df) # for all num magic, news
-    with open(f"{dataname}_mem_{a}_{b}.txt", "a") as f:
-        f.write(f"{i}, {cat_mem}, {num_mem}, {mem_weight}\n")
+    mem = cal_cat_ori(dataname, save_path, df)
+    # cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, df) # for all num magic, news
+    # with open(f"{dataname}_mem_{a}_{b}.txt", "a") as f:
+    #     f.write(f"{i}, {cat_mem}, {num_mem}, {mem_weight}\n")
     
-    para1, para2 = a * cat_mem, b * cat_mem
+    para1, para2 = a * mem, b * mem
     # print(f"{para1=}, {para2=}")
     
     x_next = x_hat + para1*((t_next - t_hat) * (d_cur - x_hat_grad * para2))
