@@ -285,11 +285,15 @@ def cal_mem_weight(dataname, generated_path, train_data):
     return cat_mem, num_mem, mem_weight
 
 def main():
-    dataname = "shoppers"
+    dataname = "cardio_train"
     train_data = pd.read_csv(f"synthetic/{dataname}/real.csv")
-    generate_data_path = input("Enter the path to the generated data: ")
+    generate_data_path = "sample_end_csv/tabddpm_cardio.csv"
     
-    cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, generate_data_path, train_data)
+    # cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, generate_data_path, train_data)
+    # cat_mem = cal_cat_ori(dataname, generate_data_path, train_data)
+    # print(cat_mem)
+    mem = cal_mem_ori(dataname, generate_data_path, train_data)
+    print(mem)
     
 if __name__ == "__main__":
     main()

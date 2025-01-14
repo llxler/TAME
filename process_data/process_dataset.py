@@ -62,7 +62,6 @@ def train_val_test_split(data_df, cat_columns, num_train = 0, num_test = 0):
     # total_num = data_df.shape[0]
     # idx = np.arange(total_num)
 
-
     # seed = 82
 
     # while True:
@@ -89,8 +88,9 @@ def train_val_test_split(data_df, cat_columns, num_train = 0, num_test = 0):
     ############## 测试小数量级数据集 ##############
     seed = 5201314
     data_seed = data_df.sample(frac=1, random_state=seed).reset_index(drop=True)
-    train_df = data_seed[:900]
-    test_df = data_seed[-100:]
+    train_df = data_seed[:num_train]
+    test_df = data_seed[num_train:]
+    print(train_df.shape + test_df.shape == data_df.shape)
     ############## 测试小数量级数据集 ##############
         
     return train_df, test_df, seed    
@@ -111,7 +111,7 @@ def process_data(name):
         data_df = data_df.drop('ID', axis=1)
 
     # 取出数据的百分比
-    data_df = data_df.sample(frac=0.1, random_state=5201314)
+    # data_df = data_df.sample(frac=0.1, random_state=5201314)
     
     num_data = data_df.shape[0]
 
@@ -151,7 +151,6 @@ def process_data(name):
 
     else:  
         # Train/ Test Split, 90% Training, 10% Testing (Validation set will be selected from Training set)
-
         num_train = int(num_data*0.9)
         num_test = num_data - num_train
 
@@ -334,7 +333,7 @@ if __name__ == "__main__":
     if args.dataname:
         process_data(args.dataname)
     else:
-        for name in ['adult', 'default', 'shoppers']:
+        for name in ['Churn_Modelling']:
             process_data(name)
 
         

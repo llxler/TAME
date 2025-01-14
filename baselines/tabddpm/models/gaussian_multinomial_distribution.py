@@ -1108,7 +1108,6 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         sample = torch.cat([z_norm, z_cat], dim=1).cpu()
         return sample
 
-    # python main.py --dataname adult --method tabddpm --mode sample --save_path mem_weight_adult.csv --task_name mem_weight_adult
     @torch.no_grad()
     def sample(self, num_samples):
         b = num_samples
