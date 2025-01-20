@@ -130,7 +130,7 @@ def sample_step(net, num_steps, i, t_cur, t_next, x_next, dim, mean, info, num_i
     last_column = df.iloc[:, -1]
 
     # 将True替换为1，False替换为0
-    last_column = last_column.replace({True: 1, False: 0}) # TODO: 修改这里
+    # last_column = last_column.replace({True: 1, False: 0}) # TODO: 修改这里
     # 将列转换为 NumPy 数组
     last_column = last_column.values
 
@@ -186,7 +186,7 @@ def sample_step(net, num_steps, i, t_cur, t_next, x_next, dim, mean, info, num_i
     #当para2 < 0时  ？
     
     ######### 计算mem指导para1和para2的选择 #########
-    a, b = 1, 0
+    a, b = -5, 900_000
     
     x_next = x_next * 2 + mean.to(device)
     
@@ -204,16 +204,17 @@ def sample_step(net, num_steps, i, t_cur, t_next, x_next, dim, mean, info, num_i
     idx_name_mapping = info['idx_name_mapping']
     idx_name_mapping = {int(key): value for key, value in idx_name_mapping.items()}
 
-    save_path = f"{dataname}_mid_{a}_{b}_fuck.csv"
+    save_path = f"{dataname}_mid_{a}_{b}.csv"
 
     syn_df.rename(columns = idx_name_mapping, inplace=True)
     syn_df.to_csv(save_path, index = False)
     
-    mem = cal_cat_ori(dataname, save_path, df)
-    # cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, df) # for all num magic, news
+    # mem = cal_cat_ori(dataname, save_path, df)
+    cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, df) # for all num magic, news
     # with open(f"{dataname}_mem_{a}_{b}.txt", "a") as f:
     #     f.write(f"{i}, {cat_mem}, {num_mem}, {mem_weight}\n")
     
+    mem = mem_weight
     para1, para2 = a * mem, b * mem
     # print(f"{para1=}, {para2=}")
     

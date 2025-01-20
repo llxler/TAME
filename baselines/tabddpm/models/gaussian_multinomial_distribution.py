@@ -1108,7 +1108,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         sample = torch.cat([z_norm, z_cat], dim=1).cpu()
         return sample
 
-    @torch.no_grad()
+    # @torch.no_grad()
     def sample(self, num_samples):
         b = num_samples
         device = self.log_alpha.device
@@ -1127,7 +1127,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         task_name = self.task_name
         mem_list, mem_cat_list, mem_num_list = {}, {}, {}
         
-        dataname = "news" # TODO 改成对应的数据集
+        dataname = "cardio_train" # TODO 改成对应的数据集
         
         # 2. 路径和数据
         raw_config = src.load_config(f"/home/lxl/TabCutMix/baselines/tabddpm/configs/{dataname}.toml")
@@ -1204,9 +1204,9 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
             model_out_num = model_out[:, :self.num_numerical_features]
             model_out_cat = model_out[:, self.num_numerical_features:]
             
-            ##### gen new fun #####
+            ########## gen new fun ##########
             # if i % 10 == 0: # 每隔十步引导一次
-            if i == -1:
+            if i != -1:
                 out = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['out']
                 noise = torch.randn_like(z_norm)
                 nonzero_mask = (
@@ -1220,10 +1220,10 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
                     z_cat = ohe_to_categories(z_ohe, self.num_classes)
                     
                 # 2. 处理成对应的表格sample_data
-                alpha_bar_t = extract(self.alphas_cumprod, t, z_norm.shape)
-                x0_hat = predict_x0(z_norm, model_out[:, :self.num_numerical_features], alpha_bar_t)
+                # alpha_bar_t = extract(self.alphas_cumprod, t, z_norm.shape)
+                # x0_hat = predict_x0(z_norm, model_out[:, :self.num_numerical_features], alpha_bar_t)
                 
-                syn_data = torch.cat([x0_hat, z_cat], dim=1).cpu()
+                syn_data = torch.cat([z_norm, z_cat], dim=1).cpu()
                 syn_data = syn_data[:train_data.shape[0], :]
                 syn_num, syn_cat, syn_target = split_num_cat_target(syn_data, info, num_inverse, cat_inverse) 
                 syn_df = recover_data(syn_num, syn_cat, syn_target, info)
@@ -1237,66 +1237,103 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
                 syn_df.to_csv(save_path, index=False)
 
                 # 3. 开始计算memorization的值
-                # mem = cal_cat_ori(dataname, save_path, train_data)
-                cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data) # 适用于数字类型数据集
+                cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data)
+                
+                # 按照步长记录三个mem值
+                # if (i + 1) % 5 == 0 or i == 0:
+                #     mem_list[i] = mem_weight
+                #     mem_cat_list[i] = cat_mem
+                #     mem_num_list[i] = num_mem
+                
                 mem = mem_weight
-
-                # 获取最后一列并准备条件
-                last_column = train_data.iloc[:, -1]
-                last_column = last_column.replace({"g": 1, "h": 0})  # TODOs 根据数据集来改写
-                last_column = last_column.values
-                last_column_tensor = torch.tensor(last_column, dtype=torch.float32).reshape(train_data.shape[0], 1)
-                y_condition = last_column_tensor.float().to(device)
-
-                # 从 out['mean'] 创建一个新的张量
-                x_hat = out['mean'].clone().float().requires_grad_(True).to(device)
-
-                # 让新的 x_hat 在反向传播时保留梯度
-                x_hat.retain_grad()
-
-                # 初始化模型
-                model = ConditionNet(x_hat.shape[1], 1).to(device)
-
-                # 计算 log_p_y_given_x_t
-                log_p_y_given_x_t = model(x_hat[:train_data.shape[0]], y_condition)
-
-                # 计算损失并检查梯度
-                loss = -log_p_y_given_x_t.mean()
-                loss.backward()
-
-                # 获取 x_hat 的梯度
-                x_hat_grad = x_hat.grad
                 
-                # 吧x_hat，y_condition从计算图中抽离出来
-                x_hat.detach_()
-                x_hat.requires_grad = False
-                y_condition.detach_()
-                y_condition.requires_grad = False
+                # 在这里调整超参数
+                aa, bb, threshold = -2, 900_000, -1 # -1是为了没有阈值，一定使用mem引导
+                
+                # 如果大于阈值，就使用mem引导的办法
+                if mem > threshold:
+                    # 获取最后一列并准备条件
+                    last_column = train_data.iloc[:, -1]
+                    # last_column = last_column.replace({"g": 1, "h": 0})  # TODO 根据数据集来改写
+                    last_column = last_column.values
+                    last_column_tensor = torch.tensor(last_column, dtype=torch.float32).reshape(train_data.shape[0], 1)
+                    y_condition = last_column_tensor.float().to(device)
 
-                # 修改步骤中的参数
-                aa, bb = -5, 900_000
-                para1, para2 = aa * mem, bb * mem
-                
-                # 更新 z_norm 的计算
-                z_norm = x_hat + para1 * nonzero_mask * (torch.exp(0.5 * out["log_variance"]) - x_hat_grad * para2) * noise
-                
-                ##### gen new fun #####
+                    # 从 out['mean'] 创建一个新的张量
+                    x_hat = out['mean'].clone().float().requires_grad_(True).to(device)
+
+                    # 让新的 x_hat 在反向传播时保留梯度
+                    x_hat.retain_grad()
+
+                    # 初始化模型
+                    model = ConditionNet(x_hat.shape[1], 1).to(device)
+
+                    # 计算 log_p_y_given_x_t
+                    log_p_y_given_x_t = model(x_hat[:train_data.shape[0]], y_condition)
+
+                    # 计算损失并检查梯度
+                    loss = -log_p_y_given_x_t.mean()
+                    loss.backward()
+
+                    # 获取 x_hat 的梯度
+                    x_hat_grad = x_hat.grad
+                    
+                    # 吧x_hat，y_condition从计算图中抽离出来
+                    x_hat.detach_()
+                    x_hat.requires_grad = False
+                    y_condition.detach_()
+                    y_condition.requires_grad = False
+
+                    # 修改步骤中的参数
+                    para1, para2 = aa * mem, bb * mem
+                        
+                    z_norm = x_hat + para1 * nonzero_mask * (torch.exp(0.5 * out["log_variance"]) - x_hat_grad * para2) * noise
+                    
+                # 如果小于阈值，那么就使用原始方法
+                else:
+                    with torch.no_grad():
+                        z_norm = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['sample']
+                                    
+            ########## gen new fun ##########
+
+            # 采用原始方法
             else:
-                z_norm = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['sample']
+                with torch.no_grad():
+                    z_norm = self.gaussian_p_sample(model_out_num, z_norm, t, clip_denoised=False)['sample']
+                # mem 记录
+                if (i + 1) % 5 == 0 or i == 0:
+                    # 1. 得到当前的sample数据
+                    z_ohe = torch.exp(log_z).round()
+                    z_cat = log_z
+                    if has_cat:
+                        z_cat = ohe_to_categories(z_ohe, self.num_classes)
+                    
+                    syn_data = torch.cat([z_norm, z_cat], dim=1).cpu()
+                    syn_data = syn_data[:train_data.shape[0], :]
+                    syn_num, syn_cat, syn_target = split_num_cat_target(syn_data, info, num_inverse, cat_inverse) 
+                    syn_df = recover_data(syn_num, syn_cat, syn_target, info)
+
+                    idx_name_mapping = info['idx_name_mapping']
+                    idx_name_mapping = {int(key): value for key, value in idx_name_mapping.items()}
+
+                    syn_df.rename(columns = idx_name_mapping, inplace=True)
+
+                    save_path = f"memorization/mid_{task_name}.csv"
+                    syn_df.to_csv(save_path, index = False)
+                    cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data)
+                    mem_list[i] = mem_weight
+                    mem_cat_list[i] = cat_mem
+                    mem_num_list[i] = num_mem
             
             if has_cat:
                 log_z = self.p_sample(model_out_cat, log_z, t)
 
         # 5. 保存mem结果
-        # if mem_list:
-        #     with open(f"eval/result/{task_name}.txt", "w") as f:
-        #         f.write(f"task_name: {task_name}\n")
-        #         for step in mem_list.keys():
-        #             f.write(f"step: {step}, mem: {mem_list[step]}, cat_mem: {mem_cat_list[step]}, num_mem: {mem_num_list[step]}\n")
-        # else:
-        #     with open(f"eval/result/{task_name}.txt", "w") as f:
-        #         f.write(f"task_name: {task_name}\n")
-        #         f.write(f"no memorization record\n")
+        if mem_list:
+            with open(f"eval/result/{task_name}.txt", "w") as f:
+                f.write(f"task_name: {task_name}\n")
+                for step in mem_list.keys():
+                    f.write(f"step: {step}, mem: {mem_list[step]}, cat_mem: {mem_cat_list[step]}, num_mem: {mem_num_list[step]}\n")
 
         print()
         z_ohe = torch.exp(log_z).round()
