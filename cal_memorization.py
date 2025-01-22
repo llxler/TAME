@@ -289,14 +289,14 @@ def main():
     train_data = pd.read_csv(f"synthetic/{dataname}/real.csv")
     # generate_data_path = "sample_end_csv/tabddpm_cardio_ori.csv"
     # generate_data_path = "sample_end_csv/tabddpm_Churn_ori.csv"
-    generate_data_path = "sample_end_csv/tabddpm_default_ori.csv"
+    generate_data_path = "sample_end_csv/tabsyn_default_ori.csv"
     
-    # cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, generate_data_path, train_data)
+    cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, generate_data_path, train_data)
     # cat_mem = cal_cat_ori(dataname, generate_data_path, train_data)
     # print(cat_mem)
     # mem = cal_mem_ori(dataname, generate_data_path, train_data)
-    mem = cal_cat_ori(dataname, generate_data_path, train_data)
-    print(mem)
+    # mem = cal_cat_ori(dataname, generate_data_path, train_data)
+    print(mem_weight)
     
 if __name__ == "__main__":
     main()

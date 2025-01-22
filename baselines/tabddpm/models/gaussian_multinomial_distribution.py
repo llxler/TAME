@@ -1127,7 +1127,7 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
         task_name = self.task_name
         mem_list, mem_cat_list, mem_num_list = {}, {}, {}
         
-        dataname = "cardio_train" # TODO 改成对应的数据集
+        dataname = "default" # TODO 改成对应的数据集
         
         # 2. 路径和数据
         raw_config = src.load_config(f"/home/lxl/TabCutMix/baselines/tabddpm/configs/{dataname}.toml")
@@ -1240,15 +1240,15 @@ class GaussianMultinomialDiffusion(torch.nn.Module):
                 cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, save_path, train_data)
                 
                 # 按照步长记录三个mem值
-                # if (i + 1) % 5 == 0 or i == 0:
-                #     mem_list[i] = mem_weight
-                #     mem_cat_list[i] = cat_mem
-                #     mem_num_list[i] = num_mem
+                if (i + 1) % 5 == 0 or i == 0:
+                    mem_list[i] = mem_weight
+                    mem_cat_list[i] = cat_mem
+                    mem_num_list[i] = num_mem
                 
                 mem = mem_weight
                 
                 # 在这里调整超参数
-                aa, bb, threshold = -2, 900_000, -1 # -1是为了没有阈值，一定使用mem引导
+                aa, bb, threshold = -5, 450_000, -1 # -1是为了没有阈值，一定使用mem引导
                 
                 # 如果大于阈值，就使用mem引导的办法
                 if mem > threshold:
