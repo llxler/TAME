@@ -130,7 +130,7 @@ def sample_step(net, num_steps, i, t_cur, t_next, x_next, dim, mean, info, num_i
     last_column = df.iloc[:, -1]
 
     # 将True替换为1，False替换为0
-    # last_column = last_column.replace({True: 1, False: 0}) # TODO: 修改这里
+    # last_column = last_column.replace({" <=50K": 1, " >50K": 0}) # TODO: 修改这里
     # 将列转换为 NumPy 数组
     last_column = last_column.values
 

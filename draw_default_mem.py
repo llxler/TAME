@@ -7,7 +7,7 @@ cat_mems, cat_mems2 = [], []
 num_mems, num_mems2 = [], []
 
 # 读取文件并解析数据
-with open('./eval/result/tabddpm_default_mem_ori.txt', 'r') as file:
+with open('eval/result/tabddpm_default_mem_ori.txt', 'r') as file:
     for line in file:
         if line.startswith('step:'):
             parts = line.split(',')
@@ -58,4 +58,4 @@ plt.legend()
 
 # 显示图表
 plt.show()
-plt.savefig('mem.png')
+plt.savefig('mem.pdf')

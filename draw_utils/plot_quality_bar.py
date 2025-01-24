@@ -2,18 +2,40 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Define the file paths
+real_data_paths = [
+    'synthetic/adult/real.csv',
+    'synthetic/default/real.csv',
+    'synthetic/shoppers/real.csv',
+    'synthetic/cardio_train/real.csv'
+]
+
+synthetic_data_paths = [
+    # adult
+    ['sample_end_csv/tabsyn_adult_ori.csv', 'sample_end_csv/tabsyn_adult_new.csv', 
+     'sample_end_csv/tabddpm_adult_ori.csv', 'sample_end_csv/tabddpm_adult_new.csv'],
+    # default
+    ['sample_end_csv/tabsyn_default_ori.csv', 'sample_end_csv/tabsyn_default_-1_90w.csv',
+     'sample_end_csv/tabddpm_default_ori.csv', 'sample_end_csv/tabddpm_default_new.csv'],
+    # shoppers
+    ['sample_end_csv/tabsyn_shoppers_ori.csv', 'sample_end_csv/tabsyn_shoppers_900000.csv',
+     'sample_end_csv/tabddpm_shoppers_ori.csv', 'sample_end_csv/tabddpm_shoppers_new.csv'],
+    # cardio_train
+    ['sample_end_csv/tabsyn_cardio_ori.csv', 'sample_end_csv/tabsyn_cardio_-5_90w.csv',
+     'sample_end_csv/tabddpm_cardio_ori.csv', 'sample_end_csv/tabddpm_cardio_-5_90w.csv']
+]
 
 def plot_comparison(datasets):
-    sns.set_context("notebook", font_scale=1.5)  # Adjust font scale to increase text size
+    sns.set_context("notebook", font_scale=1)  # Adjust font scale to increase text size
 
     # Set all font sizes to 18
-    plt.rc('font', size=30)  # controls default text sizes
-    plt.rc('axes', titlesize=30)  # fontsize of the axes title
-    plt.rc('axes', labelsize=30)  # fontsize of the x and y labels
-    plt.rc('xtick', labelsize=30)  # fontsize of the tick labels
-    plt.rc('ytick', labelsize=24)  # fontsize of the tick labels
-    plt.rc('legend', fontsize=18)  # legend fontsize
-    plt.rc('figure', titlesize=30)  # fontsize of the figure title
+    plt.rc('font', size=24)  # controls default text sizes
+    plt.rc('axes', titlesize=24)  # fontsize of the axes title
+    plt.rc('axes', labelsize=24)  # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=24)  # fontsize of the tick labels
+    plt.rc('ytick', labelsize=20)  # fontsize of the tick labels
+    plt.rc('legend', fontsize=16)  # legend fontsize
+    plt.rc('figure', titlesize=24)  # fontsize of the figure title
 
     fig, axes = plt.subplots(2, len(datasets), figsize=(24, 12))
 
@@ -24,9 +46,9 @@ def plot_comparison(datasets):
         print(f"\n--- Processing dataset: {dataname} ---\n")
 
         # File paths
-        real_data_path = f'results/distribution/{dataname}_tabcutmix/real_100.csv'
-        generated_data_path_tabsyn = f'results/distribution/{dataname}/tabsyn.csv'
-        generated_data_path_tabcutmix = f'results/distribution/{dataname}_tabcutmix/tabsyn_tabcutmix.csv'
+        real_data_path = real_data_paths[i]
+        generated_data_path_tabsyn = synthetic_data_paths[i][0]
+        generated_data_path_tabcutmix = synthetic_data_paths[i][1]
 
         # Load the data
         real_data = pd.read_csv(real_data_path)[:50]
@@ -46,13 +68,16 @@ def plot_comparison(datasets):
         elif dataname == 'magic':
             num_feature = 'Asym'  # Example feature, adjust as needed
             cat_feature = 'class'  # Example feature, adjust as needed
+        elif dataname == 'cardio_train':
+            num_feature = 'height'
+            cat_feature = 'cholesterol'
 
         # Plot numerical feature (Density Plot)
         ax = axes[0, i]
         ax.grid()
         sns.kdeplot(real_data[num_feature], ax=ax, label='Real', color='blue', fill=True)
         sns.kdeplot(tabsyn_data[num_feature], ax=ax, label='TabSyn', color='orange', fill=True)
-        sns.kdeplot(tabcutmix_data[num_feature], ax=ax, label='TabCutMix', color='green', fill=True)
+        sns.kdeplot(tabcutmix_data[num_feature], ax=ax, label='TabSyn+TameSyn', color='green', fill=True)
         ax.set_title(f'{dataname.capitalize()}')
         ax.set_ylabel('Density')
         if i == len(datasets) - 1:  # Only show legend for the last plot in the row
@@ -71,7 +96,7 @@ def plot_comparison(datasets):
             'Category': real_counts.index,
             'Real': real_counts.values,
             'TabSyn': tabsyn_counts.reindex(real_counts.index, fill_value=0).values,
-            'TabCutMix': tabcutmix_counts.reindex(real_counts.index, fill_value=0).values
+            'Tabsyn+TameSyn': tabcutmix_counts.reindex(real_counts.index, fill_value=0).values
         })
 
         df_bar_melted = df_bar.melt(id_vars='Category', var_name='Model', value_name='Proportion')
@@ -90,5 +115,5 @@ def plot_comparison(datasets):
 
 
 if __name__ == "__main__":
-    datasets = ['adult', 'default', 'shoppers', 'magic']
+    datasets = ['adult', 'default', 'shoppers', 'cardio_train']
     plot_comparison(datasets)
