@@ -52,3 +52,5 @@ DCR Score = 0.901952380952381
 4. Detection: 
 Detection Score = 1.0
 5. Quality: 
+Alpha_Precision_all = 0.9986687465790914
+Beta_Recall_all = 0.4946275132275132
