@@ -33,7 +33,6 @@ for i, path in enumerate(path_list):
         best_acc_f1 = extract_f1_score("binary_f1", re.search(r'"best_acc_scores": {.*?}', txt_content, re.DOTALL).group())
         best_avg_f1 = extract_f1_score("binary_f1", re.search(r'"best_avg_scores": {.*?}', txt_content, re.DOTALL).group())
 
-
         # 提取Density的Shape和Trend
         shape = re.search(r'Shape: ([\d.]+)', txt_content).group(1)
         trend = re.search(r'Trend: ([\d.]+)', txt_content).group(1)
@@ -56,35 +55,57 @@ for i, path in enumerate(path_list):
             "Beta": beta_recall
         }
         datas[methods[i]] = data
-    
-# print(datas)
 
 # 数据处理
 metrics = ['Mem', 'F1', 'WE', 'AUR', 'ACC', 'AVG', 'Shape', 'Trend', 'Alpha', 'Beta']
 models = list(datas.keys())
 values = {model: [float(datas[model][metric]) for metric in metrics] for model in models}
 
-# 可视化设置
-plt.figure(figsize=(18, 10))
-x = np.arange(len(metrics))
-width = 0.2  # 柱宽
-colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
+# Define the colors
+colors = ['#7CCD7C', '#EEA2AD', '#FFA07A', '#20B2AA']
 
-# 绘制柱状图
-for i, model in enumerate(models):
-    offset = width * (i - 1.5)  # 居中排列
-    plt.bar(x + offset, values[model], width=width, label=model, color=colors[i])
+# Bar width
+bar_width = 0.2
 
-# 图表装饰
-plt.title('Model Performance Comparison', fontsize=16)
-plt.xlabel('Metrics', fontsize=12)
-plt.ylabel('Scores', fontsize=12)
-plt.xticks(x, metrics, rotation=45)
-plt.ylim(0, 1.2)
-plt.grid(axis='y', alpha=0.4)
-plt.legend(loc='upper right', bbox_to_anchor=(1.15, 1))
+# Index for the categories
+index = np.arange(len(metrics))
 
-# 显示图表
-plt.tight_layout()
+# Creating the bar plot
+fig, ax = plt.subplots(figsize=(32, 16))
+ax.set_facecolor('none')  # Background transparency
+ax.grid(True, zorder=0, axis='y')  # Display grid on y-axis behind bars
+
+# Adding labels with adjustments
+ax.set_ylabel('Precision', fontsize=27)
+ax.tick_params(axis='y', labelsize=27)
+ax.tick_params(axis='x', labelsize=27)
+ax.set_xticks(index + bar_width * (len(methods) - 1) / 2)
+ax.set_xticklabels(metrics, fontsize=24)
+ax.legend(loc='upper left', fontsize=24, frameon=True)
+
+# Adding value labels to bars
+def add_value_labels(bars, fontsize=14):
+    for bar in bars:
+        height = bar.get_height()
+        ax.annotate(f'{height:.2f}',
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom', fontsize=fontsize)
+
+# Plotting each method's bars
+for i, method in enumerate(methods):
+    bars = ax.bar(index + i * bar_width, list(values[method]), bar_width, label=method, color=colors[i], edgecolor='black', zorder=3)
+    add_value_labels(bars)
+
+# Adding legend
+ax.legend(methods, loc='upper left', fontsize=24, frameon=True)
+
+# Adjust x-axis limits to fit the bars snugly
+start = index[0] - 0.5 * bar_width - 0.2
+end = index[-1] + (len(methods) - 0.5) * bar_width + 0.2
+ax.set_xlim(start, end)
+
+# Display the plot
 plt.show()
-plt.savefig('bar_chart.pdf')
+plt.savefig('bar_chart.pdf', bbox_inches='tight')

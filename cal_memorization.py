@@ -289,9 +289,18 @@ def main():
     train_data = pd.read_csv(f"synthetic/{dataname}/real.csv")
     # generate_data_path = "sample_end_csv/tabddpm_cardio_ori.csv"
     # generate_data_path = "sample_end_csv/tabddpm_Churn_ori.csv"
-    generate_data_path = "sample_end_csv/shoppers_-3_0.csv"
+    paths_list = [
+        'sample_end_csv/tabddpm_shoppers_ori.csv',
+        'sample_end_csv/tabddpm_shoppers_-5_90w.csv',
+        'sample_end_csv/tabddpm_shoppers_05_005_05.csv',
+        'sample_end_csv/shoppers_-3_0.csv',
+        'sample_end_csv/tabddpm_shoppers_new.csv'
+    ]
     
-    cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, generate_data_path, train_data)
+    for generate_data_path in paths_list: 
+        print(generate_data_path)
+        cat_mem, num_mem, mem_weight = cal_mem_weight(dataname, generate_data_path, train_data)
+    
     # cat_mem = cal_cat_ori(dataname, generate_data_path, train_data)
     # print(cat_mem)
     # mem = cal_mem_ori(dataname, generate_data_path, train_data)
