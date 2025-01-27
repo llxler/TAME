@@ -28,11 +28,11 @@ def plot_heatmaps(datasets, column_indices, real_data_paths, synthetic_data_path
     num_datasets = len(datasets)     
     num_methods = len(synthetic_data_paths[0])
     
-    methods = ['TabSyn', 'TabSyn+\nTameSyn', 'TabDDPM', 'TabDDPM+\nTameSyn']
+    methods = ['TabSyn', 'TabSyn\n+G$_{\\text{cat}}$', 'TabDDPM', 'TabDDPM\n+G$_{\\text{cat}}$']
     
     # 字体参数配置
     plt.rc('font', size=12)
-    plt.rc('axes', titlesize=18)
+    plt.rc('axes', titlesize=22)
     plt.rc('axes', labelsize=12)
     plt.rc('figure', titlesize=12)  
     
@@ -43,9 +43,9 @@ def plot_heatmaps(datasets, column_indices, real_data_paths, synthetic_data_path
     # 每一行num_methods旁边放一个method名称作为title
     for row_idx in range(num_methods):
         ax = axes[row_idx, 0]
-        ax.annotate(methods[row_idx], xy=(0, 0.5), xytext=(-ax.yaxis.labelpad - 22, 0),
+        ax.annotate(methods[row_idx], xy=(0, 0.5), xytext=(-ax.yaxis.labelpad - 23, 0),
                     xycoords=ax.yaxis.label, textcoords='offset points',
-                    size=18, ha='center', va='center', rotation=90)
+                    size=22, ha='center', va='center', rotation=90)
     
     plt.subplots_adjust(wspace=0.12, hspace=0.12)
     

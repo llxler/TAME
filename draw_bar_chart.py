@@ -7,13 +7,13 @@ def extract_f1_score(tag, section):
     pattern = r'"' + tag + '"\s*:\s*([\d.]+)'
     return re.search(pattern, section).group(1)
 
-methods = ["TabDDPM", "TabDDPM+TameSyn", "TabDDPM+ClassifierGuided", "TabDDPM+TameSyn_0"]
+methods = ["TabDDPM", "TabDDPM+G$_{\\text{cat}}$", "TabDDPM+G$_{\\text{mix}}$"]
 
 path_list = [
     'eval/result/tabddpm_shoppers_ori.txt',
     'eval/result/tabddpm_shoppers_-5_90w.txt',
     'eval/result/tabddpm_shoppers_05_005_05.txt',
-    'eval/result/shoppers_-3_0.txt'
+    # 'eval/result/shoppers_-3_0.txt'
 ]
 
 datas = {}
@@ -76,22 +76,23 @@ ax.set_facecolor('none')  # Background transparency
 ax.grid(True, zorder=0, axis='y')  # Display grid on y-axis behind bars
 
 # Adding labels with adjustments
-ax.set_ylabel('Precision', fontsize=27)
-ax.tick_params(axis='y', labelsize=27)
-ax.tick_params(axis='x', labelsize=27)
+ax.set_ylabel('Memorization Ratio', fontsize=36)
+ax.tick_params(axis='y', labelsize=36)
+ax.tick_params(axis='x', labelsize=36)
 ax.set_xticks(index + bar_width * (len(methods) - 1) / 2)
-ax.set_xticklabels(metrics, fontsize=24)
-ax.legend(loc='upper left', fontsize=24, frameon=True)
+ax.set_xticklabels(metrics, fontsize=36)
+ax.legend(loc='upper left', fontsize=36, frameon=True)
 
 # Adding value labels to bars
-def add_value_labels(bars, fontsize=14):
+def add_value_labels(bars, fontsize=24):
     for bar in bars:
         height = bar.get_height()
         ax.annotate(f'{height:.2f}',
-                    xy=(bar.get_x() + bar.get_width() / 2, height),
-                    xytext=(0, 3),  # 3 points vertical offset
-                    textcoords="offset points",
-                    ha='center', va='bottom', fontsize=fontsize)
+                xy=(bar.get_x() + bar.get_width() / 2, height),
+                xytext=(0, 3),  # 3 points vertical offset
+                textcoords="offset points",
+                ha='center', va='bottom', fontsize=fontsize,
+                rotation=90)  # Rotate the text vertically
 
 # Plotting each method's bars
 for i, method in enumerate(methods):
@@ -99,7 +100,7 @@ for i, method in enumerate(methods):
     add_value_labels(bars)
 
 # Adding legend
-ax.legend(methods, loc='upper left', fontsize=24, frameon=True)
+ax.legend(methods, loc='upper left', fontsize=32, frameon=True)
 
 # Adjust x-axis limits to fit the bars snugly
 start = index[0] - 0.5 * bar_width - 0.2
