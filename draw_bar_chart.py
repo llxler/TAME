@@ -10,10 +10,9 @@ def extract_f1_score(tag, section):
 methods = ["TabDDPM", "TabDDPM+G$_{\\text{cat}}$", "TabDDPM+G$_{\\text{mix}}$"]
 
 path_list = [
-    'eval/result/tabddpm_shoppers_ori.txt',
-    'eval/result/tabddpm_shoppers_-5_90w.txt',
-    'eval/result/tabddpm_shoppers_05_005_05.txt',
-    # 'eval/result/shoppers_-3_0.txt'
+    'eval/result/tabddpm_cardio_ori.txt',
+    'eval/result/tabddpm_cardio_-5_90w.txt',
+    'eval/result/tabddpm_cardio_05_005_05.txt',
 ]
 
 datas = {}
@@ -62,7 +61,7 @@ models = list(datas.keys())
 values = {model: [float(datas[model][metric]) for metric in metrics] for model in models}
 
 # Define the colors
-colors = ['#7CCD7C', '#EEA2AD', '#FFA07A', '#20B2AA']
+colors = ['#7CCD7C', '#EEA2AD', '#20B2AA']
 
 # Bar width
 bar_width = 0.2
@@ -71,23 +70,24 @@ bar_width = 0.2
 index = np.arange(len(metrics))
 
 # Creating the bar plot
-fig, ax = plt.subplots(figsize=(32, 16))
+fig, ax = plt.subplots(figsize=(32, 18))
 ax.set_facecolor('none')  # Background transparency
 ax.grid(True, zorder=0, axis='y')  # Display grid on y-axis behind bars
 
 # Adding labels with adjustments
-ax.set_ylabel('Memorization Ratio', fontsize=36)
-ax.tick_params(axis='y', labelsize=36)
-ax.tick_params(axis='x', labelsize=36)
+ax.set_ylim(0, 1.11)
+ax.set_ylabel('Memorization Ratio', fontsize=40)
+ax.tick_params(axis='y', labelsize=40)
+ax.tick_params(axis='x', labelsize=40)
 ax.set_xticks(index + bar_width * (len(methods) - 1) / 2)
-ax.set_xticklabels(metrics, fontsize=36)
-ax.legend(loc='upper left', fontsize=36, frameon=True)
+ax.set_xticklabels(metrics, fontsize=40)
+ax.legend(loc='upper left', fontsize=40, frameon=True)
 
 # Adding value labels to bars
-def add_value_labels(bars, fontsize=24):
+def add_value_labels(bars, fontsize=28):
     for bar in bars:
         height = bar.get_height()
-        ax.annotate(f'{height:.2f}',
+        ax.annotate(f'{height:.4f}',
                 xy=(bar.get_x() + bar.get_width() / 2, height),
                 xytext=(0, 3),  # 3 points vertical offset
                 textcoords="offset points",

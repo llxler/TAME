@@ -1,22 +1,23 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib.ticker import FuncFormatter
 
 # Define the file paths
 real_data_paths = [
-    'synthetic/adult/real.csv',
     'synthetic/default/real.csv',
+    'synthetic/adult/real.csv',
     'synthetic/shoppers/real.csv',
     'synthetic/cardio_train/real.csv'
 ]
 
 synthetic_data_paths = [
-    # adult
-    ['sample_end_csv/tabsyn_adult_ori.csv', 'sample_end_csv/tabsyn_adult_new.csv', 
-     'sample_end_csv/tabddpm_adult_ori.csv', 'sample_end_csv/tabddpm_adult_new.csv'],
     # default
     ['sample_end_csv/tabsyn_default_ori.csv', 'sample_end_csv/tabsyn_default_-1_90w.csv',
      'sample_end_csv/tabddpm_default_ori.csv', 'sample_end_csv/tabddpm_default_new.csv'],
+    # adult
+    ['sample_end_csv/tabsyn_adult_ori.csv', 'sample_end_csv/tabsyn_adult_new.csv', 
+     'sample_end_csv/tabddpm_adult_ori.csv', 'sample_end_csv/tabddpm_adult_new.csv'],
     # shoppers
     ['sample_end_csv/tabsyn_shoppers_ori.csv', 'sample_end_csv/tabsyn_shoppers_900000.csv',
      'sample_end_csv/tabddpm_shoppers_ori.csv', 'sample_end_csv/tabddpm_shoppers_new.csv'],
@@ -29,18 +30,23 @@ def plot_comparison(datasets):
     sns.set_context("notebook", font_scale=1)  # Adjust font scale to increase text size
 
     # Set all font sizes to 18
-    plt.rc('font', size=24)  # controls default text sizes
-    plt.rc('axes', titlesize=24)  # fontsize of the axes title
-    plt.rc('axes', labelsize=24)  # fontsize of the x and y labels
-    plt.rc('xtick', labelsize=24)  # fontsize of the tick labels
-    plt.rc('ytick', labelsize=20)  # fontsize of the tick labels
-    plt.rc('legend', fontsize=16)  # legend fontsize
-    plt.rc('figure', titlesize=24)  # fontsize of the figure title
+    plt.rc('font', size=40)  # controls default text sizes
+    plt.rc('axes', titlesize=40)  # fontsize of the axes title
+    plt.rc('axes', labelsize=40)  # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=40)  # fontsize of the tick labels
+    plt.rc('ytick', labelsize=40)  # fontsize of the tick labels
+    plt.rc('legend', fontsize=40)  # legend fontsize
+    plt.rc('figure', titlesize=40)  # fontsize of the figure title
 
-    fig, axes = plt.subplots(2, len(datasets), figsize=(24, 12))
+    fig, axes = plt.subplots(2, len(datasets), figsize=(43, 15))
 
-    plt.tight_layout(rect=[0.02, 0.32, 0.98, 0.95])  # Adjust the rect to reduce left and right margins
-    plt.subplots_adjust(wspace=0.45, hspace=0.45)
+    plt.tight_layout(rect=[0.01, 0.01, 0.99, 0.99])  # Adjust the rect to reduce margins
+    plt.subplots_adjust(wspace=0.28, hspace=0.28)
+
+    def format_k(x, pos):
+        if x >= 1000:
+            return f'{int(x/1000)}K'
+        return f'{int(x)}'
 
     for i, dataname in enumerate(datasets):
         print(f"\n--- Processing dataset: {dataname} ---\n")
@@ -77,11 +83,17 @@ def plot_comparison(datasets):
         ax.grid()
         sns.kdeplot(real_data[num_feature], ax=ax, label='Real', color='blue', fill=True)
         sns.kdeplot(tabsyn_data[num_feature], ax=ax, label='TabSyn', color='orange', fill=True)
-        sns.kdeplot(tabcutmix_data[num_feature], ax=ax, label='TabSyn+TameSyn', color='green', fill=True)
+        sns.kdeplot(tabcutmix_data[num_feature], ax=ax, label='TabSyn+Tame', color='green', fill=True)
         ax.set_title(f'{dataname.capitalize()}')
-        ax.set_ylabel('Density')
-        if i == len(datasets) - 1:  # Only show legend for the last plot in the row
-            ax.legend()
+        if dataname == 'cardio_train':
+            ax.set_title('Cardio')
+            
+        if i == 0:  # Only show ylabel for the first plot in the row
+            ax.set_ylabel('Density')
+        else:
+            ax.set_ylabel('')
+        if i == 0:  # Only show legend for the first plot in the row
+            ax.legend(loc='upper right', framealpha=0.3, fontsize=28)
         else:
             ax.legend().remove()
 
@@ -96,24 +108,59 @@ def plot_comparison(datasets):
             'Category': real_counts.index,
             'Real': real_counts.values,
             'TabSyn': tabsyn_counts.reindex(real_counts.index, fill_value=0).values,
-            'Tabsyn+TameSyn': tabcutmix_counts.reindex(real_counts.index, fill_value=0).values
+            'Tabsyn+Tame': tabcutmix_counts.reindex(real_counts.index, fill_value=0).values
         })
 
         df_bar_melted = df_bar.melt(id_vars='Category', var_name='Model', value_name='Proportion')
         sns.barplot(x='Category', y='Proportion', hue='Model', data=df_bar_melted, ax=ax)
-
-        ax.set_xlabel(f'{cat_feature.capitalize()}')  # Set x-axis label to feature name
-        ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
-        if i == len(datasets) - 1:  # Only show legend for the last plot in the row
-            ax.legend()
+        
+        titles = ax.get_xticklabels()
+        new_titles = []
+        
+        for title in titles:
+            text = title.get_text()
+            print(text)
+            if text == ' Husband':
+                new_titles.append('Hus.')
+            elif text == ' Not-in-family':
+                new_titles.append('Notin.')
+            elif text == ' Own-child':
+                new_titles.append('Kid')
+            elif text == ' Unmarried':
+                new_titles.append('Unma.')
+            elif text == "Returning_Visitor":
+                new_titles.append("Re.")
+            elif text == "New_Visitor":
+                new_titles.append("New")
+            elif text == " Wife":
+                new_titles.append("Wife")
+            else:
+                new_titles.append(text)
+        
+        print("处理完后")
+        print(new_titles)
+        
+        ax.set_xticklabels(new_titles)
+        
+        ax.set_xlabel(cat_feature.capitalize())  # Set x-axis label to feature name
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+        if i == 0:  # Only show ylabel for the first plot in the row
+            ax.set_ylabel('Proportion')
+        else:
+            ax.set_ylabel('')
+        if i == 0:  # Only show legend for the first plot in the row
+            ax.legend(loc='upper right', framealpha=0.3, fontsize=28)
         else:
             ax.legend().remove()
-    plt.savefig('quality_bar.pdf', format='pdf')
 
+        # Apply the formatter to the x-axis of the numerical feature plot
+        if dataname == 'adult' or dataname == 'default':
+            ax = axes[0, i]
+            ax.xaxis.set_major_formatter(FuncFormatter(format_k))
+
+    plt.savefig('quality_bar.pdf', format='pdf')
     plt.show()
 
-
-
 if __name__ == "__main__":
-    datasets = ['adult', 'default', 'shoppers', 'cardio_train']
+    datasets = ['default', 'adult', 'shoppers', 'cardio_train']
     plot_comparison(datasets)

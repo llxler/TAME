@@ -290,7 +290,9 @@ def main():
     # generate_data_path = "sample_end_csv/tabddpm_cardio_ori.csv"
     # generate_data_path = "sample_end_csv/tabddpm_Churn_ori.csv"
     paths_list = [
-        'sample_end_csv/shoppers_-1_45w.csv',
+        'sample_end_csv/tabddpm_shoppers_ori.csv',
+        'sample_end_csv/shoppers_-05_45w.csv',
+        'sample_end_csv/shoppers_-05_90w.csv'
     ]
     
     for generate_data_path in paths_list: 

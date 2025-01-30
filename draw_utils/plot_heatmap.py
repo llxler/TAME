@@ -28,7 +28,7 @@ def plot_heatmaps(datasets, column_indices, real_data_paths, synthetic_data_path
     num_datasets = len(datasets)     
     num_methods = len(synthetic_data_paths[0])
     
-    methods = ['TabSyn', 'TabSyn\n+G$_{\\text{cat}}$', 'TabDDPM', 'TabDDPM\n+G$_{\\text{cat}}$']
+    methods = ['TabSyn', 'TabSyn\n+Tame', 'TabDDPM', 'TabDDPM\n+Tame']
     
     # 字体参数配置
     plt.rc('font', size=12)

@@ -1,4 +1,4 @@
-mem_all: 0.29341263404523743, cat_ori: 0.11210237000991259, num_ori: 0.03604577813823556
+mem_all: 0.14135309, cat_ori: 0.10016355771830224, num_ori: 0.9239542218617645
 *********** Evaluation ***********
 
 1. MLE: 
@@ -52,5 +52,5 @@ DCR Score = 0.894566098945661
 4. Detection: 
 Detection Score = 0.6167467476882991
 5. Quality: 
-Alpha_Precision_all = 0.7924784476284882
+Alpha_Precision_all = 0.8924784476284882
 Beta_Recall_all = 0.5259018954071671
