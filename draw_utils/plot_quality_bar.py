@@ -26,6 +26,8 @@ synthetic_data_paths = [
      'sample_end_csv/tabddpm_cardio_ori.csv', 'sample_end_csv/tabddpm_cardio_-5_90w.csv']
 ]
 
+colors = ['#7CCD7C', '#EEA2AD', '#20B2AA']
+
 def plot_comparison(datasets):
     sns.set_context("notebook", font_scale=1)  # Adjust font scale to increase text size
 
@@ -81,9 +83,9 @@ def plot_comparison(datasets):
         # Plot numerical feature (Density Plot)
         ax = axes[0, i]
         ax.grid()
-        sns.kdeplot(real_data[num_feature], ax=ax, label='Real', color='blue', fill=True)
-        sns.kdeplot(tabsyn_data[num_feature], ax=ax, label='TabSyn', color='orange', fill=True)
-        sns.kdeplot(tabcutmix_data[num_feature], ax=ax, label='TabSyn+Tame', color='green', fill=True)
+        sns.kdeplot(real_data[num_feature], ax=ax, label='Real', color=colors[0], fill=True)
+        sns.kdeplot(tabsyn_data[num_feature], ax=ax, label='TabSyn', color=colors[1], fill=True)
+        sns.kdeplot(tabcutmix_data[num_feature], ax=ax, label='TabSyn+Tame', color=colors[2], fill=True)
         ax.set_title(f'{dataname.capitalize()}')
         if dataname == 'cardio_train':
             ax.set_title('Cardio')
@@ -93,7 +95,7 @@ def plot_comparison(datasets):
         else:
             ax.set_ylabel('')
         if i == 0:  # Only show legend for the first plot in the row
-            ax.legend(loc='upper right', framealpha=0.3, fontsize=28)
+            ax.legend(loc='upper right', framealpha=0.3, fontsize=26)
         else:
             ax.legend().remove()
 
@@ -112,7 +114,8 @@ def plot_comparison(datasets):
         })
 
         df_bar_melted = df_bar.melt(id_vars='Category', var_name='Model', value_name='Proportion')
-        sns.barplot(x='Category', y='Proportion', hue='Model', data=df_bar_melted, ax=ax)
+        # sns.barplot(x='Category', y='Proportion', hue='Model', data=df_bar_melted, ax=ax)
+        sns.barplot(x='Category', y='Proportion', hue='Model', data=df_bar_melted, ax=ax, palette=colors)
         
         titles = ax.get_xticklabels()
         new_titles = []
@@ -149,7 +152,7 @@ def plot_comparison(datasets):
         else:
             ax.set_ylabel('')
         if i == 0:  # Only show legend for the first plot in the row
-            ax.legend(loc='upper right', framealpha=0.3, fontsize=28)
+            ax.legend(loc='upper right', framealpha=0.3, fontsize=26)
         else:
             ax.legend().remove()
 

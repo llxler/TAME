@@ -85,7 +85,7 @@ def plot_heatmaps(datasets, column_indices, real_data_paths, synthetic_data_path
             sns.heatmap(
                 divergence,
                 ax=ax,
-                cmap='Blues',
+                cmap='OrRd',
                 cbar=False,
                 xticklabels=False,  # 关闭X轴标签
                 yticklabels=False   # 关闭Y轴标签
@@ -99,7 +99,7 @@ def plot_heatmaps(datasets, column_indices, real_data_paths, synthetic_data_path
     
     # ========== 添加全局colorbar ==========    
     cbar_ax = fig.add_axes([0.92, 0.11, 0.02, 0.77])  # 右侧定位
-    sm = plt.cm.ScalarMappable(cmap='Blues', norm=plt.Normalize(0, 1))
+    sm = plt.cm.ScalarMappable(cmap='OrRd', norm=plt.Normalize(0, 1))
     fig.colorbar(sm, cax=cbar_ax, aspect=10)
     
     plt.savefig('quality_heatmap.pdf', bbox_inches='tight')
