@@ -1,7 +1,37 @@
-# (ICLR 2025 Submission) Unveiling Memorization in Diffusion Models for Tabular Data
+# (ICLR 2025 Submission) TAME: Towards Memorization-Free Table Synthesis via Diffusion Models
 
-Tabular data generation has attracted significant research interest in recent years, with the tabular diffusion models greatly improving the quality of synthetic data. However, while memorization—where models inadvertently replicate exact or near-identical training data—has been thoroughly investigated in image and text generation, its effects on tabular data remain largely unexplored. In this paper, we conduct the first comprehensive investigation of memorization phenomena in diffusion models for tabular data. Our empirical analysis reveals that memorization appears in tabular diffusion models and increases with larger training epochs. We further examine the influence of factors such as dataset sizes, feature dimensions, and different diffusion models on memorization. Additionally, we provide a theoretical explanation for why memorization occurs in tabular diffusion models. To address this issue, we propose TabCutMix, a simple yet effective data augmentation technique that exchanges randomly selected feature segments between random training sample pairs. Experimental results across various datasets and diffusion models demonstrate that TabCutMix effectively mitigates memorization while maintaining high-quality data generation.
+## Introduction
+<div align="center">
+<figure style="text-align: center;">
+    <img src="assets/TAME-pipeline.png" alt="TAME-pipeline" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
+    <figcaption>Figure 1: Guidance pipeline of TAME.</figcaption>
+</figure>
+<br>
+</div>
 
+Diffusion models have gained notable attention
+for their capacity to synthesize high-quality tabular data. 
+However, research indicates that the distribution of some outputs strikingly resembles that of the training data. This similarity could
+pose legal challenges for model owners, especially when the synthesized tables include sensitive attributes. In this paper, we conduct a series of investigations into the causes of memorization in diffusion models when synthesizing
+tabular data. We discover that memorization occurs primarily during the sampling process, and intensifies as the complexity between categorical attributes increases. To address this issue, we propose TAME, a framework designed to mitigate memorization of tabular diffusion model in sampling process. TAME provides comprehensive memory guidance, ranging from categorical to mixed-type attributes in tabular data. We integrate TAME into two state-of-the-art table diffusion models, TabSyn and TabDDPM. Experimental results across various datasets demonstrate that TAME achieves memorization-free outputs while  maintaining high-quality data generation.
+
+## Performance
+<div align="center">
+  <figure style="text-align: center;">
+    <img src="assets/performance.png" alt="performance-table" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
+    <figcaption>Figure 2: The performance of TAME and baselines under four mixed-type dataset of in terms of Mem.Ratio(%), MLE and data quality.</figcaption>
+  </figure>
+  <figure style="text-align: center;">
+    <img src="assets/heatmap.png" alt="performance-table" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
+    <figcaption>Figure 3: Heatmaps of the pair-wise column correlation of synthetic data v.s. the real data. </figcaption>
+  </figure>
+
+  <figure style="text-align: center;">
+    <img src="assets/distribution.png" alt="performance-table" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
+    <figcaption>Figure 4: Visualization of synthetic data’s single column distribution density v.s. the real data. </figcaption>
+  </figure>
+  <br>
+</div>
 
 ## Installing Dependencies
 
@@ -10,18 +40,13 @@ Python version: 3.10
 Create environment
 
 ```
-conda create -n tabsyn python=3.10
-conda activate tabsyn
+conda create -n tame python=3.10
+conda activate tame
 ```
 
 Install pytorch
 ```
 pip install torch torchvision torchaudio
-```
-
-or via conda
-```
-conda install pytorch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2 pytorch-cuda=11.7 -c pytorch -c nvidia
 ```
 
 Install other dependencies
@@ -41,39 +66,18 @@ pip install synthcity
 pip install category_encoders
 ```
 
-## Preparing Datasets
-
-Download raw dataset:
-
-```
-python download_dataset.py
-```
-
-Process dataset:
-
-```
-python process_dataset.py
-```
-uncomment line 170 for different train sizes
-
-Process dataset for different feature dimensions:
-```
-python remove_features.py
-python process_dataset.py
-```
-
 ## Training Models
 
-For baseline methods, use the following command for training:
+For tabDDPM, use the following command for training:
 
 ```
 python main.py --dataname [NAME_OF_DATASET] --method [NAME_OF_BASELINE_METHODS] --mode train
 ```
 
-Options of [NAME_OF_DATASET]: adult, default, shoppers, magic
-Options of [NAME_OF_BASELINE_METHODS]: stay, tabddpm
+Options of [NAME_OF_DATASET]: adult, default, shoppers, cardio_train
+Options of [NAME_OF_BASELINE_METHODS]: tabddpm
 
-For Tabsyn, use the following command for training:
+For TabSyn, use the following command for training:
 
 ```
 # train VAE first
@@ -108,10 +112,8 @@ python cal_memorization.py
 ## Evaluation
 We evaluate the quality of synthetic data using metrics from various aspects.
 
-#### Density estimation of single column and pair-wise correlation ([link](https://docs.sdv.dev/sdmetrics/reports/quality-report/whats-included))
-
 ```
-python eval/eval_density.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
+python -m eval.eval_all
 ```
 
 
@@ -120,30 +122,7 @@ python eval/eval_density.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] -
 - $\beta$-recall: the diversity of synthetic data
 
 ```
-python eval/eval_quality.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
-```
-
-#### Machine Learning Efficiency
-
-```
-python eval/eval_mle.py --dataname [NAME_OF_DATASET] --model [METHOD_NAME] --path [PATH_TO_SYNTHETIC_DATA]
-```
-
-## Visualization
-```
-python plot_replicate_epoch.py
-python plot_replicate_train_size.py
-python plot_replicate_feature.py
-python plot_replicate_cutmix_threshold.py
-python plot_memorization_distribute_merge.py
-python plot_memorization_visualization.py
-python plot_heatmap.py
-python plot_shape_bar.py
-```
-
-## Case Study
-```
-python case_study.py
+python eval/eval_quality.py
 ```
 
 ## Acknowledgements
