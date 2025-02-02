@@ -1,4 +1,4 @@
-# (ICLR 2025 Submission) TAME: Towards Memorization-Free Table Synthesis via Diffusion Models
+# TAME: Towards Memorization-Free Table Synthesis via Diffusion Models
 
 ## Introduction
 <div align="center">
@@ -17,18 +17,18 @@ tabular data. We discover that memorization occurs primarily during the sampling
 
 ## Performance
 <div align="center">
-  <figure style="text-align: center;">
+  <!-- <figure style="text-align: center;">
     <img src="assets/performance.png" alt="performance-table" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
     <figcaption>Figure 2: The performance of TAME and baselines under four mixed-type dataset of in terms of Mem.Ratio(%), MLE and data quality.</figcaption>
-  </figure>
+  </figure> -->
   <figure style="text-align: center;">
     <img src="assets/heatmap.png" alt="performance-table" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
-    <figcaption>Figure 3: Heatmaps of the pair-wise column correlation of synthetic data v.s. the real data. </figcaption>
+    <figcaption>Figure 2: Heatmaps of the pair-wise column correlation of synthetic data v.s. the real data. </figcaption>
   </figure>
 
   <figure style="text-align: center;">
     <img src="assets/distribution.png" alt="performance-table" width="800" style="margin-left:'auto' margin-right:'auto' display:'block'"/>
-    <figcaption>Figure 4: Visualization of synthetic data’s single column distribution density v.s. the real data. </figcaption>
+    <figcaption>Figure 3: Visualization of synthetic data’s single column distribution density v.s. the real data. </figcaption>
   </figure>
   <br>
 </div>
